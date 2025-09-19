@@ -5,6 +5,10 @@ void main() {
   window.scheduleFrame();
 }
 
+Offset? center;
+late Offset velocity;
+Duration? lastDuration;
+
 void beginFrame(Duration duration) {
   final pixelRatio = window.devicePixelRatio;
   final size = window.physicalSize / pixelRatio;
@@ -14,9 +18,33 @@ void beginFrame(Duration duration) {
   final canvas = Canvas(recorder, physicalBounds);
   canvas.scale(pixelRatio, pixelRatio);
 
+  final radius = size.shortestSide / 4;
+
+  if (center == null) {
+    center = size.center(Offset.zero);
+    velocity = Offset(3, 5);
+  } else {
+    if (center!.dx < radius || center!.dx > size.width - radius) {
+      velocity = velocity.scale(-1, 1);
+    }
+
+    if (center!.dy < radius || center!.dy > size.height - radius) {
+      velocity = velocity.scale(1, -1);
+    }
+
+    if (lastDuration != null ) {
+      final delta = (duration - lastDuration!).inMilliseconds / 1000;
+      center = center! + velocity * delta;
+    } else {
+      center = center! + velocity;
+    }
+
+    lastDuration = duration;
+  }
+
   final paint = Paint()..color = Color(0xFFF44336);
-  final center = size.center(Offset.zero);
-  canvas.drawCircle(center, size.shortestSide / 4, paint);
+
+  canvas.drawCircle(center!, radius, paint);
 
   final picture = recorder.endRecording();
   final sceneBuilder = SceneBuilder()
@@ -25,6 +53,8 @@ void beginFrame(Duration duration) {
   ..pop();
 
   window.render(sceneBuilder.build());
+
+  window.scheduleFrame();
 }
 
 
