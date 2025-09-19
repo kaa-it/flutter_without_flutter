@@ -1,7 +1,9 @@
+import 'dart:math';
 import 'dart:ui';
 
 void main() {
   window.onBeginFrame = beginFrame;
+  window.onPointerDataPacket = pointerDataPacket;
   window.scheduleFrame();
 }
 
@@ -57,4 +59,16 @@ void beginFrame(Duration duration) {
   window.scheduleFrame();
 }
 
+final _random = Random();
+
+void pointerDataPacket(PointerDataPacket packet) {
+  for (final data in packet.data) {
+    if (data.change == PointerChange.up) {
+      velocity = Offset.fromDirection(
+        _random.nextDouble() * pi * 2,
+        _random.nextDouble() * 800 - 400,
+      );
+    }
+  }
+}
 
