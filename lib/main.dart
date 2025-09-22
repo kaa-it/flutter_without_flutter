@@ -2,9 +2,10 @@ import 'dart:math';
 import 'dart:ui';
 
 void main() {
-  window.onBeginFrame = beginFrame;
-  window.onPointerDataPacket = pointerDataPacket;
-  window.scheduleFrame();
+  final dispatcher = PlatformDispatcher.instance;
+  dispatcher.onBeginFrame = beginFrame;
+  dispatcher.onPointerDataPacket = pointerDataPacket;
+  dispatcher.scheduleFrame();
 }
 
 Offset? center;
@@ -12,8 +13,9 @@ late Offset velocity;
 Duration? lastDuration;
 
 void beginFrame(Duration duration) {
-  final pixelRatio = window.devicePixelRatio;
-  final size = window.physicalSize / pixelRatio;
+  final view = PlatformDispatcher.instance.views.first;
+  final pixelRatio = view.devicePixelRatio;
+  final size = view.physicalSize / pixelRatio;
   final physicalBounds = Offset.zero & size * pixelRatio;
 
   final recorder = PictureRecorder();
@@ -54,9 +56,9 @@ void beginFrame(Duration duration) {
   ..addPicture(Offset.zero, picture)
   ..pop();
 
-  window.render(sceneBuilder.build());
+  view.render(sceneBuilder.build());
 
-  window.scheduleFrame();
+  PlatformDispatcher.instance.scheduleFrame();
 }
 
 final _random = Random();
